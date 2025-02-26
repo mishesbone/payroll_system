@@ -1,0 +1,34 @@
+{% extends 'base.html' %}  {# Assuming you have a base template #}
+
+{% block content %}
+  <h2>Payroll Reports</h2>
+
+  <form method="POST">
+    <label for="report_type">Report Type:</label>
+    <select name="report_type" id="report_type">
+      <option value="monthly">Monthly</option>
+      <option value="employee">Employee</option>
+      {# Add more report types as needed #}
+    </select>
+
+    <label for="start_date">Start Date:</label>
+    <input type="date" name="start_date" id="start_date">
+
+    <label for="end_date">End Date:</label>
+    <input type="date" name="end_date" id="end_date">
+
+    <button type="submit">Generate Report</button>
+  </form>
+
+  {% if reports %}
+    <h3>Report Results:</h3>
+    <ul>
+      {% for report in reports %}
+        <li>
+          {{ report.report_type }} Report ({{ report.report_date }}) - <a href="{{ url_for('report.download_report', report_id=report.report_id) }}">Download</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+{% endblock %}

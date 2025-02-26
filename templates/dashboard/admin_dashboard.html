@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+
+<h3>All Employees</h3>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Department</th>
+    </tr>
+    {% for employee in employees %}
+    <tr>
+        <td>{{ employee.name }}</td>
+        <td>{{ employee.email }}</td>
+        <td>{{ employee.department }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>All Payroll Records</h3>
+<table>
+    <tr>
+        <th>Employee</th>
+        <th>Salary</th>
+        <th>Date</th>
+    </tr>
+    {% for payroll in payrolls %}
+    <tr>
+        <td>{{ payroll.user.name }}</td>
+        <td>{{ payroll.salary }}</td>
+        <td>{{ payroll.date }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>All Attendance Records</h3>
+<table>
+    <tr>
+        <th>Employee</th>
+        <th>Date</th>
+        <th>Status</th>
+    </tr>
+    {% for record in attendance_records %}
+    <tr>
+        <td>{{ record.user.name }}</td>
+        <td>{{ record.date }}</td>
+        <td>{{ record.status }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

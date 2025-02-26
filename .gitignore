@@ -1,0 +1,50 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env
+*.env
+*.venv
+
+# Flask cache and session files
+instance/
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# Logs and debug files
+*.log
+logs/
+app.log
+error.log
+
+# Compiled C extensions
+*.so
+
+# Celery worker files
+celerybeat-schedule
+celerybeat.pid
+
+# Ignore migrations cache
+migrations/
+*.pyc
+*.pyo
+
+# Node dependencies (if using frontend tools)
+node_modules/
+npm-debug.log
+
+# IDE / Editor specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# System files
+Thumbs.db
+desktop.ini

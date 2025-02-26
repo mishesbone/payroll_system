@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Payroll Details</h2>
+
+  {% if payroll %}
+    <p><strong>Employee ID:</strong> {{ payroll.employee_id }}</p>
+    <p><strong>Pay Date:</strong> {{ payroll.pay_date }}</p>
+    <p><strong>Gross Pay:</strong> {{ payroll.gross_pay }}</p>
+    <p><strong>Net Pay:</strong> {{ payroll.net_pay }}</p>
+
+    <h3>Deductions:</h3>
+    <ul>
+      {% for deduction in payroll.deductions %}
+        <li>{{ deduction.type }}: {{ deduction.amount }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Payroll details not found.</p>
+  {% endif %}
+
+  <a href="{{ url_for('payroll.payroll_home') }}">Back to Payroll</a>
+
+{% endblock %}

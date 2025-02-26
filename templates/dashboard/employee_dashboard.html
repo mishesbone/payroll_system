@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Welcome, {{ current_user.name }}</h2>
+
+<h3>Your Payroll Records</h3>
+<table>
+    <tr>
+        <th>Salary</th>
+        <th>Date</th>
+    </tr>
+    {% for payroll in payrolls %}
+    <tr>
+        <td>{{ payroll.salary }}</td>
+        <td>{{ payroll.date }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Your Attendance Records</h3>
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Status</th>
+    </tr>
+    {% for record in attendance_records %}
+    <tr>
+        <td>{{ record.date }}</td>
+        <td>{{ record.status }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

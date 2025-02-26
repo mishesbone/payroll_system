@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Payroll Information</h2>
+
+  <form method="POST">
+    <label for="employee_id">Employee ID:</label>
+    <input type="text" name="employee_id" id="employee_id">
+
+    <label for="start_date">Start Date:</label>
+    <input type="date" name="start_date" id="start_date">
+
+    <label for="end_date">End Date:</label>
+    <input type="date" name="end_date" id="end_date">
+
+    <button type="submit">Search Payroll</button>
+  </form>
+
+  {% if payroll_data %}
+    <h3>Payroll Results:</h3>
+    <ul>
+      {% for payroll in payroll_data %}
+        <li>
+          Pay Date: {{ payroll.pay_date }}, Net Pay: {{ payroll.net_pay }} - <a href="{{ url_for('payroll.payroll_details', payroll_id=payroll.payroll_id) }}">Details</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+{% endblock %}
