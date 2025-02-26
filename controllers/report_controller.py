@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, send_from_directory, url_for
 from flask_login import login_required, current_user
 import datetime
 # Assuming you have a database model for reports, adjust as needed
@@ -11,7 +11,7 @@ report_bp = Blueprint('report', __name__)
 @login_required
 def payroll_home():
     reports = []
-    if current_user.is_admin: # Only admins can view reports. Adjust as needed.
+    if current_user.is_admin: 
         if request.method == 'POST':
             report_type = request.form.get('report_type')
             start_date_str = request.form.get('start_date')
@@ -26,7 +26,7 @@ def payroll_home():
                 if report_type == 'monthly' and start_date and end_date:
                     reports = PayrollReport.query.filter(PayrollReport.report_date >= start_date, PayrollReport.report_date <= end_date).all()
 
-                # Example of dummy reports for demonstration:
+                
                 if report_type == 'monthly' and start_date and end_date:
                     reports = [
                         {'report_id': 1, 'report_type': 'monthly', 'report_date': start_date, 'file_path': '/reports/monthly_1.pdf'},
@@ -55,7 +55,7 @@ def download_report(report_id):
     if current_user.is_admin:
         # Fetch the report from the database or wherever it's stored
         report = PayrollReport.query.get_or_404(report_id)
-        # For demonstration:
+        
         report = next((r for r in [
             {'report_id': 1, 'report_type': 'monthly', 'report_date': datetime.date(2023, 1, 1), 'file_path': '/reports/monthly_1.pdf'},
             {'report_id': 2, 'report_type': 'monthly', 'report_date': datetime.date(2023, 2, 1), 'file_path': '/reports/monthly_2.pdf'},
@@ -64,13 +64,15 @@ def download_report(report_id):
         ] if r['report_id'] == report_id), None)
         if report:
             # Logic to send the file to the user
-            #return send_from_directory(app.config['UPLOAD_FOLDER'], report.file_path)
-            # For demonstration, a simple redirect:
+            return send_from_directory(app.config['UPLOAD_FOLDER'], report.file_path)
+            
             flash(f"Download initiated for report ID: {report_id}", "success")
-            return redirect(report['file_path']) #Replace with proper download logic
+            return redirect(report['file_path']) 
         else:
             flash('Report not found.', 'error')
             return redirect(url_for('report.payroll_home'))
     else:
         flash('You do not have permission to download reports.', 'warning')
         return redirect(url_for('employee.employee_dashboard'))
+    
+
