@@ -80,13 +80,3 @@ Contributions are welcome! To contribute:
 4. **Push to GitHub** (`git push origin feature-branch`)  
 5. **Submit a Pull Request** 🚀  
 
----
-
-
-
----
-
-This improved version:  
-✅ **Uses clear sections** for readability  
-✅ **Adds proper formatting** (icons, bold text)  
-✅ **Provides structured setup instructions**  
