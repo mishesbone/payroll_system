@@ -10,9 +10,9 @@ from models.payroll import Payroll
 # Create Blueprint
 employee_bp = Blueprint('employee', __name__)
 
+    
 
-
-# 🔹 Employee Dashboard (User-specific records)
+# Employee Dashboard (User-specific records)
 @employee_bp.route('/employee_dashboard', methods=['GET'])
 @login_required
 def employee_dashboard():

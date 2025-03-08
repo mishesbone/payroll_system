@@ -36,6 +36,8 @@ def send_verification_email(user):
     msg.body = f"Hello {user.username},\n\nPlease verify your email by clicking the link below:\n{confirm_url}\n\nIf you did not request this, please ignore it."
     mail.send(msg)
 
+from flask import jsonify
+
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
@@ -47,29 +49,28 @@ def register():
         accept_terms = form.accept_terms.data
 
         if not accept_terms:
-            flash("You must accept the Terms and Conditions to register.", "danger")
-            return redirect(request.url)
+            return jsonify({"success": False, "message": "You must accept the Terms and Conditions."}), 400
 
         if User.query.filter_by(email=email).first():
-            flash("This email is already registered. Try logging in instead.", "danger")
-            return redirect(request.url)
+            return jsonify({"success": False, "message": "This email is already registered."}), 400
 
         if User.query.filter_by(username=username).first():
-            flash("This username is already taken. Choose a different one.", "danger")
-            return redirect(request.url)
+            return jsonify({"success": False, "message": "This username is already taken."}), 400
 
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
 
-        new_user = User(email=email, username=username, password=hashed_password, role="user", accepted_terms=True, is_enabled=False)
+        new_user = User(
+            email=email, username=username, password=hashed_password,
+            role="user", accepted_terms=True, is_enabled=False
+        )
         db.session.add(new_user)
         db.session.commit()
 
         send_verification_email(new_user)
 
-        flash("Account created successfully! A confirmation email has been sent. Please verify your email to enable your account.", "success")
-        return redirect(url_for('dashboard.index'))  # Navigate to dashboard
+        return jsonify({"success": True, "message": "Account created! Check your email.", "redirect_url": "/dashboard"}), 200
 
-    return render_template('auth/register.html', form=form)
+    return render_template('auth/register.html', form=form)  # Render template only for GET requests
 
 @auth_bp.route('/verify_email/<token>')
 def verify_email(token):

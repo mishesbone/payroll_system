@@ -7,6 +7,7 @@
     <div class="row justify-content-center"> <div class="col-md-4"> <div class="card shadow-sm p-4">
                 <h2 class="mb-4 text-center">Create an Account</h2>
                 <form method="POST" id="registrationForm">
+                    {{ form.hidden_tag() }}  {# CSRF Token included here #}
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" class="form-control" id="username" name="username" required autofocus>

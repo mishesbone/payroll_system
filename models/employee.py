@@ -1,49 +1,90 @@
+import logging
 from datetime import datetime
+
+from sqlalchemy import Column, Integer
 from app import db
-from .payroll import Payroll  
-from .attendance import Attendance
-from .leave import Leave
-from .user import User
-from models.company import Company
 
-
+# Configure logging
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    filename='payroll_system.log')
+logger = logging.getLogger('employee')
 
 class Employee(db.Model):
     __tablename__ = 'employees'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    employee_id = db.Column(db.String(20), unique=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    department = db.Column(db.String(50), nullable=False)
-    position = db.Column(db.String(50), nullable=False)
-    hire_date = db.Column(db.Date, nullable=False)
-    birth_date = db.Column(db.Date, nullable=True)
-    gender = db.Column(db.String(10), nullable=True)
-    address = db.Column(db.String(200), nullable=True)
+    id = Column(Integer, primary_key=True)
+    employee_id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
     phone = db.Column(db.String(20), nullable=True)
-    emergency_contact_name = db.Column(db.String(100), nullable=True)
-    emergency_contact_phone = db.Column(db.String(20), nullable=True)
-    bank_name = db.Column(db.String(100), nullable=True)
-    bank_account = db.Column(db.String(50), nullable=True)
-    tax_id = db.Column(db.String(50), nullable=True)
-    base_salary = db.Column(db.Float, default=0.0)
-    employment_status = db.Column(db.String(20), default='active')  # active, terminated, suspended
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)
-    
+    hire_date = db.Column(db.Date, nullable=False)
+    position = db.Column(db.String(100), nullable=False)
+    department = db.Column(db.String(100), nullable=False)
+    salary = db.Column(db.Float, default=0.0)
+
     # Relationships
-    user = db.relationship('User', back_populates='employee')
-    payrolls = db.relationship('Payroll', back_populates='employee')
-    attendances = db.relationship('Attendance', back_populates='employee')
-    leaves = db.relationship('Leave', back_populates='employee')
-
+    paid_activities = db.relationship('PaidActivity', back_populates='employee', cascade='all, delete-orphan')
+    provider_rates = db.relationship('ProviderRate', back_populates='employee', cascade='all, delete-orphan')
     
-    def __repr__(self):
-        return f'<Employee {self.employee_id}>'
-
     @property
     def full_name(self):
-        return f"{self.user.first_name} {self.user.last_name}"
+        return f"{self.first_name} {self.last_name}"
     
+    def calculate_years_of_service(self):
+        """Calculate years of service based on hire date"""
+        if not self.hire_date:
+            return 0
+        
+        try:
+            today = datetime.now()
+            years_of_service = today.year - self.hire_date.year
+            
+            # Adjust for hire date not yet reached in current year
+            if (today.month, today.day) < (self.hire_date.month, self.hire_date.day):
+                years_of_service -= 1
+                
+            return max(0, years_of_service)
+        except Exception as e:
+            logger.error(f"Error calculating years of service: {e}")
+            return 0
+    
+    def to_dict(self):
+        """Convert employee object to dictionary"""
+        return {
+            'employee_id': self.employee_id,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email,
+            'phone': self.phone,
+            'hire_date': self.hire_date.strftime("%Y-%m-%d") if isinstance(self.hire_date, datetime) else self.hire_date,
+            'position': self.position,
+            'department': self.department,
+            'salary': self.salary
+        }
+    
+    @classmethod
+    def from_dict(cls, data):
+        """Create employee object from dictionary"""
+        if not data:
+            return None
+            
+        # Handle hire_date conversion
+        hire_date = data.get('hire_date')
+        if hire_date and isinstance(hire_date, str):
+            try:
+                hire_date = datetime.strptime(hire_date, "%Y-%m-%d")
+            except ValueError:
+                logger.error(f"Invalid date format for hire_date: {hire_date}")
+                
+        return cls(
+            employee_id=data.get('employee_id'),
+            first_name=data.get('first_name', ''),
+            last_name=data.get('last_name', ''),
+            email=data.get('email', ''),
+            phone=data.get('phone', ''),
+            hire_date=hire_date,
+            position=data.get('position', ''),
+            department=data.get('department', ''),
+            salary=data.get('salary', 0.0)
+        )

@@ -40,7 +40,8 @@ def create_app():
     app.config["MAIL_PASSWORD"] = "your_email_password"  # Use environment variables instead!
     app.config["MAIL_DEFAULT_SENDER"] = "your_email@example.com"
 
-
+    app.config['SESSION_TYPE'] = 'filesystem'
+    
 
     # Initialize extensions with app
     db.init_app(app)

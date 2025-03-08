@@ -19,7 +19,7 @@ class Config:
     DEBUG = os.environ.get('DEBUG') == 'True'
     
     # 📦 Database Configuration
-    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://admin:admin@localhost:3061/payroll_db"
+    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://admin:admin@localhost:3061/pms"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 

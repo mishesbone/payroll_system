@@ -2,16 +2,13 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
 from wtforms.validators import InputRequired, Email, Length, EqualTo
 from wtforms.validators import DataRequired, ValidationError
-
 class RegistrationForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    username = StringField("Username", validators=[DataRequired(), Length(min=2, max=30)])
-    password = PasswordField("Password", validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField("Confirm Password", validators=[DataRequired(), EqualTo("password")])
-    accept_terms = BooleanField("I accept the Terms and Conditions", validators=[DataRequired()])
-    submit = SubmitField("Register")
-
-    
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    accept_terms = BooleanField('I accept the Terms and Conditions', validators=[DataRequired()])
+    submit = SubmitField('Register')
 
 
 class LoginForm(FlaskForm):

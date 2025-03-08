@@ -32,3 +32,6 @@ dotenv
 flask-oauthlib
 flask_wtf
 flask_dance
+mysql-connector-python==8.0.31
+argparse==1.4.0
+pandas

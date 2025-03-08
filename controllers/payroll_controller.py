@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, jsonify, render_template, request, flash, redirect, send_file, url_for
 from flask_login import login_required, current_user
 import datetime
-
+import pandas as pd
+from flask import send_file
 from models.payroll import Payroll
 
 # Assuming you have database models for payroll data, employees, etc.
@@ -63,3 +64,37 @@ def payroll_details(payroll_id):
     else:
         flash('Payroll details not found.', 'error')
         return redirect(url_for('payroll.payroll'))
+
+@payroll_bp.route('/generate', methods=['POST'])
+@login_required
+def generate_payroll():
+    data = request.json
+    employee_id = data.get('employee_id')
+    pay_period = data.get('pay_period')
+    pay_category = data.get('pay_category')
+    amount = data.get('amount')
+    bonuses = data.get('bonuses', 0)
+
+    payroll = Payroll(
+        employee_id=employee_id,
+        pay_period=pay_period,
+        pay_category=pay_category,
+        amount=amount,
+        bonuses=bonuses,
+        approved=False
+    )
+
+    db.session.add(payroll)
+    db.session.commit()
+
+    return jsonify({'message': 'Payroll generated successfully', 'payroll_id': payroll.id}), 201
+
+@payroll_bp.route('/export', methods=['GET'])
+def export_payroll():
+    payrolls = Payroll.query.all()
+    data = [{'Employee ID': p.employee_id, 'Pay Period': p.pay_period, 'Amount': p.amount, 'Bonus': p.bonuses, 'Approved': p.approved} for p in payrolls]
+
+    df = pd.DataFrame(data)
+    df.to_csv('payroll_export.csv', index=False)
+
+    return send_file('payroll_export.csv', as_attachment=True)

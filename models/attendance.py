@@ -6,7 +6,7 @@ class Attendance(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
-    user_id=db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id=db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     date = db.Column(db.Date, nullable=False)
     check_in = db.Column(db.DateTime, nullable=True)
     check_out = db.Column(db.DateTime, nullable=True)
