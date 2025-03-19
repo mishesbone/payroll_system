@@ -1,7 +1,5 @@
 from app import db
 from datetime import datetime
-from models import Employee, Payroll, User
-
 
 class Company(db.Model):
     __tablename__ = 'companies'
@@ -17,5 +15,9 @@ class Company(db.Model):
 
     # Delayed Import for PayrollReport to avoid circular imports
     def get_payroll_reports(self):
-        from models.payroll import PayrollReport
+        from .payroll import PayrollReport
         return PayrollReport.query.filter_by(company_id=self.id).all()
+
+    @classmethod
+    def get_company_by_name(cls, name):
+        return cls.query.filter_by(name=name).first()

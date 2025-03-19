@@ -1,5 +1,9 @@
 import logging
+
+from flask import Blueprint
 from models import Employee
+
+salary_calculator_bp = Blueprint('salary_calculator', __name__)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, 

@@ -2,8 +2,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from itsdangerous import URLSafeTimedSerializer
-from app import db
-
+from extensions import db  # Import db from the extensions module
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
@@ -34,13 +33,9 @@ class User(db.Model, UserMixin):
     def password(self, password):
         self.password_hash = generate_password_hash(password)
     
-
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
         
-    def verify_password(self, password):
-        return check_password_hash(self.password_hash, password)
-    
     def is_admin(self):
         return self.role == 'admin'
     
@@ -61,4 +56,3 @@ class User(db.Model, UserMixin):
     
     def __repr__(self):
         return f'<User {self.username}>'
-

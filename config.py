@@ -3,7 +3,6 @@ import secrets
 import logging
 from dotenv import load_dotenv
 
-
 # Load environment variables from .env
 load_dotenv()
 
@@ -19,9 +18,8 @@ class Config:
     DEBUG = os.environ.get('DEBUG') == 'True'
     
     # 📦 Database Configuration
-    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://admin:admin@localhost:3061/pms"
+    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://admin:admin@localhost:3306/pms"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
 
     # 📧 Email Configuration
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
@@ -56,11 +54,9 @@ class Config:
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
 
-
 class DevelopmentConfig(Config):
     """Development environment settings."""
     DEBUG = True
-
 
 class TestingConfig(Config):
     """Testing environment settings."""
@@ -69,13 +65,11 @@ class TestingConfig(Config):
     WTF_CSRF_ENABLED = False
     PRESERVE_CONTEXT_ON_EXCEPTION = False
 
-
 class ProductionConfig(Config):
     """Production environment settings."""
     DEBUG = False
     TESTING = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost/payroll')
-
 
 # 🔄 Configuration Dictionary
 config_by_name = {
@@ -83,7 +77,6 @@ config_by_name = {
     'testing': TestingConfig,
     'production': ProductionConfig
 }
-
 
 def get_config():
     """Retrieve the appropriate configuration based on FLASK_ENV."""

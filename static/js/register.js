@@ -1,33 +1,31 @@
-document.getElementById("registrationForm").addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    let formData = new FormData(this);
-    let csrfToken = document.querySelector('input[name="csrf_token"]').value;  // Ensure it is correctly fetched
-
-    fetch(this.action, {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": csrfToken,  // Include CSRF token here
-            "Accept": "application/json"
-        },
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert("Registration successful! Redirecting...");
-            window.location.href = data.redirect_url || "/dashboard";  // Redirect to dashboard
-        } else {
-            alert(data.message || "Something went wrong.");
-        }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        alert("An error occurred. Please try again.");
+document.addEventListener('DOMContentLoaded', function() {
+    const registerForm = document.getElementById('registerForm');
+    
+    registerForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const formData = new FormData(registerForm);
+        const data = {};
+        
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+        
+        fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/employee_dashboard';
+            } else {
+                alert('Registration failed: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
     });
 });

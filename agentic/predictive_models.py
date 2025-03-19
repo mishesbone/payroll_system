@@ -186,7 +186,6 @@ class SalaryPredictor:
                 'confidence': 0
             }
 
-
 class AttendancePredictor:
     """
     Model to predict attendance patterns and anomalies

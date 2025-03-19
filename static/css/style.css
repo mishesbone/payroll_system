@@ -4,10 +4,26 @@
 body {
     font-family: 'Arial', sans-serif;
     background-color: #f8f9fa; /* Light background */
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
 }
 
 .main-content {
     padding: 20px;
+}
+
+.container {
+    width: 200%;
+    margin: auto;
+    overflow: hidden;
 }
 
 /* Navbar Customizations */
@@ -68,6 +84,20 @@ body {
 footer {
     margin-top: 30px;
     box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 20px 0; /* Increased padding for better spacing */
+    position: relative; 
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    footer {
+        width: auto;
+        padding: 15px 0; /* Adjust padding for smaller screens */
+        font-size: 14px; /* Smaller font size for better readability */
+    }
 }
 
 /* Add custom styles for buttons, forms, and other elements as needed */
@@ -93,6 +123,17 @@ footer {
 .form-control:focus {
     border-color: #80bdff;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Create Account and Login Cards */
+.card {
+    width: 100%; /* Ensure full width */
+    max-width: 500px; /* Set a maximum width */
+    margin: 20px auto; /* Center the card */
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    background-color: #fff;
 }
 
 /* Responsive adjustments */

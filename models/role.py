@@ -1,4 +1,4 @@
-from app import db
+from extensions import db  # Import db from the extensions module
 from datetime import datetime
 
 class Role(db.Model):
@@ -11,4 +11,3 @@ class Role(db.Model):
 
     def __repr__(self):
         return f'<Role {self.name}>'
-    

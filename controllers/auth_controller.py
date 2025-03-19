@@ -1,22 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models.user import User
-from services.email_service import EmailService as send_email
-from forms.auth_forms import RegistrationForm, LoginForm, ResetPasswordForm  
-from app import db
-
-from auth.oauth import google_bp  # ✅ Correct import
-
-
-# Blueprint for authentication
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from werkzeug.security import generate_password_hash
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
-from models import User
-from app import db, mail  # Ensure `mail` is set up in `app.py`
-
+from models.user import User
+from models.company import Company
+from services.email_service import EmailService as send_email
+from forms.auth_forms import RegistrationForm, LoginForm, ResetPasswordForm
+from app import db, mail
 
 auth_bp = Blueprint("auth", __name__)
 serializer = URLSafeTimedSerializer("YOUR_SECRET_KEY")  # Change to a secure key
@@ -36,8 +27,6 @@ def send_verification_email(user):
     msg.body = f"Hello {user.username},\n\nPlease verify your email by clicking the link below:\n{confirm_url}\n\nIf you did not request this, please ignore it."
     mail.send(msg)
 
-from flask import jsonify
-
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
@@ -46,7 +35,9 @@ def register():
         email = form.email.data.strip().lower()
         username = form.username.data.strip()
         password = form.password.data
+        confirm_password = form.confirm_password.data
         accept_terms = form.accept_terms.data
+        company_name = form.company.data.strip()
 
         if not accept_terms:
             return jsonify({"success": False, "message": "You must accept the Terms and Conditions."}), 400
@@ -61,9 +52,21 @@ def register():
 
         new_user = User(
             email=email, username=username, password=hashed_password,
-            role="user", accepted_terms=True, is_enabled=False
+            role=form.role.data, accepted_terms=True, is_enabled=False
         )
         db.session.add(new_user)
+        db.session.commit()
+
+        # Create or get the company
+        company = Company.query.filter_by(name=company_name).first()
+        if not company:
+            company = Company(name=company_name, admin_id=new_user.id)
+            db.session.add(company)
+            db.session.commit()
+
+        # Associate user with the company
+        user_company = UserCompany(user_id=new_user.id, company_id=company.id)
+        db.session.add(user_company)
         db.session.commit()
 
         send_verification_email(new_user)
@@ -92,8 +95,6 @@ def verify_email(token):
         flash("The verification link has expired. Please register again.", "danger")
         return redirect(url_for('auth.register'))
 
-
-# 🔹 Login Route
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -116,7 +117,6 @@ def login():
 
     return render_template('auth/login.html', form=form)
 
-# Logout route
 @auth_bp.route('/logout')
 @login_required
 def logout():
@@ -124,8 +124,6 @@ def logout():
     flash("Logged out successfully!", "success")
     return redirect(url_for('auth.login'))
 
-
-# Password reset request
 @auth_bp.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     if request.method == 'POST':
@@ -150,7 +148,6 @@ def reset_password():
 
     return render_template('auth/reset_password.html')
 
-# Password reset confirmation
 @auth_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password_token(token):
     user = User.verify_reset_token(token)
@@ -168,3 +165,9 @@ def reset_password_token(token):
         return redirect(url_for('auth.login'))
 
     return render_template('auth/reset_password_token.html')
+
+@auth_bp.route('/export', methods=['GET'])
+@login_required
+def export_users():
+    # Logic to export user data to CSV
+    return jsonify({"message": "Exporting user data to CSV"})

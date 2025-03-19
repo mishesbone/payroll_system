@@ -1,15 +1,12 @@
 import os
 import logging
-from flask import Flask, render_template, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import LoginManager
-from flask_mail import Mail
 from celery import Celery
+from flask import Flask, render_template, redirect, url_for, send_from_directory, request, flash
+from extensions import db, migrate, login_manager, mail, celery, csrf  # Import extensions from extensions module
 from config import get_config
-from flask_wtf.csrf import CSRFProtect
 from auth.oauth import google_bp, oauth_bp
-
+from models.user import User
+from models.role import Role
 
 # Configure Logging
 logging.basicConfig(
@@ -17,17 +14,6 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
-
-# Define Flask extensions globally
-db = SQLAlchemy()
-migrate = Migrate()
-login_manager = LoginManager()
-mail = Mail()
-celery = Celery()
-csrf = CSRFProtect()
-
-
-
 
 def create_app():
     """Flask app factory function."""
@@ -42,7 +28,6 @@ def create_app():
 
     app.config['SESSION_TYPE'] = 'filesystem'
     
-
     # Initialize extensions with app
     db.init_app(app)
     migrate.init_app(app, db)
@@ -58,8 +43,16 @@ def create_app():
     from controllers.report_controller import report_bp
     from controllers.admin_controller import admin_bp
     from controllers.dashboard_controller import dashboard_bp
-    from auth.oauth import oauth_bp
+    from controllers.attendance_controller import attendance_bp
+    from controllers.department_controller import department_bp
+    from controllers.role_controller import role_bp
+    from controllers.leave_controller import leave_bp
+    from controllers.user_controller import user_bp
+    from controllers.services import services_bp
+    from controllers.products import products_bp
+    from controllers.downloads import downloads_bp
     
+    from auth.oauth import oauth_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(employee_bp)
@@ -68,18 +61,29 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(oauth_bp)
+    app.register_blueprint(attendance_bp)
+    app.register_blueprint(department_bp)
+    app.register_blueprint(role_bp)
+    app.register_blueprint(leave_bp)
+    app.register_blueprint(user_bp)
+    app.register_blueprint(services_bp)
+    app.register_blueprint(products_bp)
+    app.register_blueprint(downloads_bp)
+    
     app.register_blueprint(google_bp, url_prefix="/login")
     
+    # Import User model here to avoid circular import
+    from models.user import User
 
-
-    
-
+    # Serve static files
+    @app.route('/static/<path:filename>')
+    def static_files(filename):
+        return send_from_directory('static', filename)
 
     # Error Handlers
     @app.errorhandler(404)
     def page_not_found(e):
-        logging.warning(f"404 Error: {e}")
-        return render_template('errors/404.html'), 404
+        return render_template('errors/404.html', user_id=1), 404  # Provide a default user_id
 
     @app.errorhandler(500)
     def internal_server_error(e):
@@ -95,6 +99,34 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+
+    @app.route('/register', methods=['GET', 'POST'])
+    def register():
+        if request.method == 'POST':
+            username = request.form['username']
+            email = request.form['email']
+            password = request.form['password']
+            confirm_password = request.form['confirm_password']
+            role = request.form['role']
+
+            if password != confirm_password:
+                flash('Passwords do not match', 'danger')
+                return redirect(url_for('auth.register'))
+
+            user = User(username=username, email=email)
+            user.set_password(password)
+            user.role = Role.query.filter_by(name=role).first()
+
+            db.session.add(user)
+            db.session.commit()
+
+            flash('Registration successful', 'success')
+            if role == 'admin':
+                return redirect(url_for('dashboard.admin_dashboard'))
+            else:
+                return redirect(url_for('dashboard.employee_dashboard'))
+
+        return render_template('auth/register.html')
 
     return app
 
